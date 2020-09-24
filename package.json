@@ -1,9 +1,11 @@
 {
-  "name": "node.js_learning",
+  "name": "mfee09-node",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
+    "bn": "nodemon --exec babel-node src/index.js",
+    "bn1": "babel-node src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,6 +15,16 @@
     "@babel/core": "^7.11.6",
     "@babel/node": "^7.10.5",
     "@babel/preset-env": "^7.11.5",
+    "ejs": "^3.1.5",
     "express": "^4.17.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iris-yu17/node.js_learning.git"
+  },
+  "bugs": {
+    "url": "https://github.com/iris-yu17/node.js_learning/issues"
+  },
+  "homepage": "https://github.com/iris-yu17/node.js_learning#readme"
 }
