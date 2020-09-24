@@ -60,12 +60,13 @@ app.post('/try-post', parser, (req, res) => {
 
 
 // try-post-form 同個路由但方法不同
+// 對 /try-post-form 路由發出 get 要求時的回應：
 app.get('/try-post-form', (req, res) => {
-    res.render('try-post-form');
+    res.render('try-post-form', { email: '', password: '' });
 });
-
+// 對 /try-post-form 路由發出 post 要求時的回應：
 app.post('/try-post-form', (req, res) => {
-    res.json(req.body);
+    res.render('try-post-form', req.body);
 });
 
 
