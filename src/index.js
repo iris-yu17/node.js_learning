@@ -122,6 +122,11 @@ app.get('/try-uuid', (req, res) => {
     });
 });
 
+const upload2 = require(__dirname + '/upload-img-module');
+app.post('/try-upload2', upload2.single('avatar'), (req, res) => {
+    res.json(req.file);
+});
+
 app.use(express.static(__dirname + '/../public'));
 
 app.use((req, res) => {
