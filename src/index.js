@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 
 // upload位置  (dest stands for destination)
 const upload = multer({ dest: __dirname + '/../tmp_uploads' });
@@ -14,6 +15,10 @@ app.set('view engine', 'ejs');
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+app.use((req, res, next) => {
+    res.locals.title = '小新牛排店';
+    next();
+})
 
 // 位置改/aaa/bbb bs會跑掉
 app.get('/', (req, res) => {
@@ -31,6 +36,8 @@ app.get('/', (req, res) => {
 app.get('/json-sales', (req, res) => {
     // require會把他轉為array(因json是array格式)
     const sales = require(__dirname + '/../data/sales');
+
+    res.locals.title += ' - JSON';
 
     // test: require會把它轉為array
     // res.send(sales.constructor.name)
@@ -145,7 +152,16 @@ app.get(/^\/09\d{2}\-?\d{3}\-?\d{3}$/, (req, res) => {
     res.send(u);
 });
 
+// admin2
 app.use(require(__dirname + '/routes/admin2'));
+// admin3
+app.use("/base123", require(__dirname + '/routes/admin3'));
+
+// axios
+app.get('/yahoo', async (req, res) => {
+    const response = await axios.get('https://tw.yahoo.com/');
+    res.send(response.data);
+});
 
 app.use(express.static(__dirname + '/../public'));
 
