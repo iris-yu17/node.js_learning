@@ -127,6 +127,26 @@ app.post('/try-upload2', upload2.single('avatar'), (req, res) => {
     res.json(req.file);
 });
 
+
+// 不加問號就兩個參數都要寫
+app.get('/my-params1/:action?/:id?', (req, res) => {
+    res.json(req.params);
+});
+app.get('/my-params2/*?/*?', (req, res) => {
+    res.json(req.params);
+});
+
+
+// 手機號碼
+app.get(/^\/09\d{2}\-?\d{3}\-?\d{3}$/, (req, res) => {
+    let u = req.url.slice(1);
+    u = u.split('?')[0];
+    u = u.split('-').join('');
+    res.send(u);
+});
+
+app.use(require(__dirname + '/routes/admin2'));
+
 app.use(express.static(__dirname + '/../public'));
 
 app.use((req, res) => {
