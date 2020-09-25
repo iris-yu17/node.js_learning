@@ -1,5 +1,10 @@
 const express = require('express');
+const multer = require('multer');
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
 
+// upload位置  (dest stands for destination)
+const upload = multer({ dest: __dirname + '/../tmp_uploads' });
 const app = express();
 
 // 設定樣版引擎
@@ -69,6 +74,53 @@ app.post('/try-post-form', (req, res) => {
     res.render('try-post-form', req.body);
 });
 
+
+// avatar是自訂的name
+app.post('/try-upload', upload.single('avatar'), (req, res) => {
+    console.log(req.file);
+
+    if (req.file && req.file.originalname) {
+        let ext = '';
+
+        switch (req.file.mimetype) {
+            case 'image/png':
+            case 'image/jpeg':
+            case 'image/gif':
+
+                fs.rename(
+                    req.file.path,
+                    __dirname + '/../public/img/' + req.file.originalname,
+                    error => {
+                        return res.json({
+                            success: true,
+                            path: '/img/' + req.file.originalname
+                        });
+                    });
+
+                break;
+            default:
+                fs.unlink(req.file.path, error => {
+                    return res.json({
+                        success: false,
+                        msg: '不是圖檔'
+                    });
+                });
+
+        }
+    } else {
+        return res.json({
+            success: false,
+            msg: '沒有上傳檔案'
+        });
+    }
+});
+
+app.get('/try-uuid', (req, res) => {
+    res.json({
+        uuid1: uuidv4(),
+        uuid2: uuidv4(),
+    });
+});
 
 app.use(express.static(__dirname + '/../public'));
 
