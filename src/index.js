@@ -1,7 +1,13 @@
+require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const session = require('express-session');
+const MysqlStore = require('express-mysql-session')(session);
+const moment = require('moment-timezone');
+const db = require('./db_connect2');
+const sessionStore = new MysqlStore({}, db);
 const axios = require('axios');
 
 // upload位置  (dest stands for destination)
@@ -10,6 +16,17 @@ const app = express();
 
 // 設定樣版引擎
 app.set('view engine', 'ejs');
+
+// session
+app.use(session({
+    saveUninitialized: false,
+    resave: false,
+    secret: 'jghdkasskjfks37848kj',
+    store: sessionStore,
+    cookie: {
+        maxAge: 1200000
+    }
+}));
 
 // top-level middleware
 app.use(express.urlencoded({ extended: false }));
@@ -162,6 +179,45 @@ app.get('/yahoo', async (req, res) => {
     const response = await axios.get('https://tw.yahoo.com/');
     res.send(response.data);
 });
+
+
+app.get('/try-session', (req, res) => {
+    req.session.myVar = req.session.myVar || 0;
+    req.session.myVar++;
+    // send裡面要是字串，用''+把它轉為字串
+    res.send('' + req.session.myVar)
+
+    console.log(req.session);
+
+    // 看json註解掉上面send
+    // res.json({
+    //     myVar: req.session.myVar,
+    //     session: req.session
+    // });
+});
+
+app.get('/try-moment', (req, res) => {
+    const fm = 'YYYY-MM-DD HH:mm:ss';
+    const now = moment(new Date());
+
+    res.json({
+        t1: new Date(),
+        t2: now.format(fm),
+        t2a: now.tz('Europe/London').format(fm),
+        t3: moment(req.session.cookie.expires).format(fm),
+        t3b: moment(req.session.cookie.expires).tz('Asia/Tokyo').format(fm),
+        'process.env.DB_NAME': process.env.DB_NAME,
+    });
+});
+
+app.get('/try-db', (req, res) => {
+    db.query('SELECT * FROM address_book LIMIT 2')
+        .then(([results]) => {
+            res.json(results);
+        })
+});
+
+app.use('/address-book', require(__dirname + '/routes/address-book'));
 
 app.use(express.static(__dirname + '/../public'));
 
