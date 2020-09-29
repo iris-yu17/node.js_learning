@@ -1,4 +1,5 @@
 const express = require('express');
+const moment = require('moment-timezone');
 const db = require(__dirname + '/../db_connect2');
 
 const router = express.Router();
@@ -10,7 +11,7 @@ router.get('/', (req, res) => {
 async function getListData(req) {
     const output = {
         page: 0,
-        perPage: 10,
+        perPage: 5,
         totalRows: 0,
         totalPages: 0,
         rows: []
@@ -33,6 +34,10 @@ async function getListData(req) {
         let sql = `SELECT * FROM address_book ORDER BY sid DESC LIMIT ${(output.page - 1) * output.perPage}, ${output.perPage}`;
 
         const [r2] = await db.query(sql);
+        r2.forEach(el => {
+            // 生日格式轉換
+            el.birthday = moment(el.birthday).format('YYYY-MM-DD')
+        });
         output.rows = r2;
     }
 
@@ -64,6 +69,13 @@ router.get('/api', async (req, res) => {
 router.get('/list', async (req, res) => {
     const output = await getListData(req);
     res.render('address-book/list', output);
+});
+
+router.get('/add', (req, res) => {
+    res.render('address-book/add');
+});
+router.post('/add', (req, res) => {
+
 });
 
 /*
