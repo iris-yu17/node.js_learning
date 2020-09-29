@@ -1,6 +1,7 @@
 const express = require('express');
 const moment = require('moment-timezone');
 const db = require(__dirname + '/../db_connect2');
+const upload = require(__dirname + '/../upload-img-module');
 
 const router = express.Router();
 
@@ -11,10 +12,11 @@ router.get('/', (req, res) => {
 async function getListData(req) {
     const output = {
         page: 0,
-        perPage: 5,
+        perPage: 10,
         totalRows: 0,
         totalPages: 0,
-        rows: []
+        rows: [],
+        pages: []
     };
 
     const [[{ totalRows }]] = await db.query("SELECT COUNT(1) totalRows FROM address_book");
@@ -31,12 +33,60 @@ async function getListData(req) {
             output.page = page;
         }
 
+        // 處理頁碼按鈕
+        (function (page, totalPages, prevNum) {
+            let pages = [];
+            if (totalPages <= prevNum * 2 + 1) {
+                for (let i = 1; i <= totalPages; i++) {
+                    pages.push(i);
+                }
+            } else {
+                const fAr = [], bAr = [];
+                // 從前面開始數
+                for (let i = page - prevNum; i <= totalPages; i++) {
+                    if (i >= 1) {
+                        fAr.push(i);
+                    }
+                    if (fAr.length >= prevNum * 2 + 1) break;
+                }
+                // 從後面開始數
+                for (let i = page + prevNum; i >= 1; i--) {
+                    if (i <= totalPages) {
+                        bAr.unshift(i);
+                    }
+                    if (bAr.length >= prevNum * 2 + 1) break;
+                }
+                pages = fAr.length > bAr.length ? fAr : bAr;
+            }
+            output.pages = pages;
+        })(page, output.totalPages, 3);
+
+        // 處理頁碼按鈕 2
+        (function (page, totalPages, prevNum) {
+            let beginPage, endPage;
+            if (totalPages <= prevNum * 2 + 1) {
+                beginPage = 1;
+                endPage = totalPages;
+            } else if (page - 1 < prevNum) {
+                beginPage = 1;
+                endPage = prevNum * 2 + 1;
+            } else if (totalPages - page < prevNum) {
+                beginPage = totalPages - (prevNum * 2 + 1);
+                endPage = totalPages;
+            } else {
+                beginPage = page - prevNum;
+                endPage = page + prevNum;
+            }
+            output.beginPage = beginPage;
+            output.endPage = endPage;
+        })(page, output.totalPages, 3);
+
+
         let sql = `SELECT * FROM address_book ORDER BY sid DESC LIMIT ${(output.page - 1) * output.perPage}, ${output.perPage}`;
 
         const [r2] = await db.query(sql);
         r2.forEach(el => {
-            // 生日格式轉換
-            el.birthday = moment(el.birthday).format('YYYY-MM-DD')
+            el.birthday2 = moment(el.birthday).format('YYYY-MM-DD');
         });
         output.rows = r2;
     }
@@ -74,8 +124,30 @@ router.get('/list', async (req, res) => {
 router.get('/add', (req, res) => {
     res.render('address-book/add');
 });
-router.post('/add', (req, res) => {
+router.post('/add', upload.none(), async (req, res) => {
+    const data = { ...req.body };
+    data.created_at = new Date();
+    const sql = "INSERT INTO `address_book` set ?";
+    const [{ affectedRows, insertId }] = await db.query(sql, [data]);
+    // [{"fieldCount":0,"affectedRows":1,"insertId":860,"info":"","serverStatus":2,"warningStatus":1},null]
 
+    res.json({
+        success: !!affectedRows,
+        affectedRows,
+        insertId,
+    });
+});
+
+router.get('/edit/:sid', async (req, res) => {
+    const sql = "SELECT * FROM address_book WHERE sid=?";
+
+    const [results] = await db.query(sql, [req.params.sid]);
+    if (!results.length) {
+        return res.redirect('/address-book/list');
+    }
+
+    results[0].birthday = moment(results[0].birthday).format('YYYY-MM-DD');
+    res.render('address-book/edit', results[0]);
 });
 
 /*
