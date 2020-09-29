@@ -96,7 +96,7 @@
         if (isPass) {
             const fd = new FormData(document.form1);
 
-            fetch('/address-book/add', {
+            fetch('', {
                 method: 'POST',
                 body: fd
             })
@@ -104,13 +104,13 @@
                 .then(obj => {
                     console.log(obj);
                     if (obj.success) {
-                        infobar.html('新增成功');
+                        infobar.html('修改成功');
                         infobar.removeClass('alert-danger').addClass('alert-success');
                         // setTimeout(() => {
                         //     location.href = 'data-list.php';
                         // }, 3000)
                     } else {
-                        infobar.html(obj.error || '新增失敗');
+                        infobar.html(obj.error || '修改失敗');
                         infobar.removeClass('alert-success').addClass('alert-danger');
                         submitBtn.style.display = 'block';
                     }

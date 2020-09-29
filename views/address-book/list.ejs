@@ -6,7 +6,7 @@
     }
 
     table tbody .fa-trash {
-        color: rgb(73, 144, 202);
+        color: red;
         cursor: pointer;
     }
 </style>
@@ -62,7 +62,7 @@
                 <tbody>
                     <% for(let i of rows){ %>
                     <tr>
-                        <td><i class="fas fa-trash"></i></td>
+                        <td><i class="fas fa-trash" data-sid="<%= i.sid %>"></i></td>
                         <td><%= i.sid %></td>
                         <td><%= i.name %></td>
                         <td><%= i.email %></td>
@@ -97,24 +97,30 @@
 </div>
 <%- include('../parts/scripts') %>
 <script>
-    /*
-    // 練習
-    // jq
-    $("table tbody .fa-trash").on("click", function () {
-        $(this).closest('tr').remove();
+
+    $('table tbody .fa-trash').on('click', function () {
+        const sid = $(this).attr('data-sid');
+        // const sid = $(this).data('sid');
+
+        fetch('/address-book/del/' + sid, {
+            method: 'DELETE',
+        })
+            .then(r => r.json())
+            .then(obj => {
+                console.log(obj);
+                location.reload();
+            })
+
     });
 
-
-    // js
-    // 監聽整個tbody，裡面也會監聽到
-    document.querySelector('tbody').addEventListener('click', (event) => {
+    /*
+    document.querySelector('tbody').addEventListener('click', (event)=>{
+        console.log(event.target.className);
         console.log(event.target.classList);
-        // 如點到的有包含fa-trash就remove
-        if (event.target.classList.contains('fa-trash')) {
+        if(event.target.classList.contains('fa-trash')){
             event.target.closest('tr').remove();
         }
     });
     */
 </script>
-
 <%- include('../parts/html-foot') %>
