@@ -5,6 +5,24 @@ const upload = require(__dirname + '/../upload-img-module');
 
 const router = express.Router();
 
+router.use((req, res, next) => {
+    const whiteList = ['list', 'login'];
+
+    let u = req.url.split('?')[0];
+    u = u.split('/');
+    //console.log(`address-book: ${u[1]}`);
+    if (whiteList.includes(u[1])) {
+        next();
+    } else {
+        if (!req.session.admin) {
+            res.redirect('/address-book/list');
+        } else {
+            next();
+        }
+    }
+});
+
+
 router.get('/', (req, res) => {
     res.redirect('/address-book/list');
 });
@@ -141,7 +159,12 @@ router.get('/api', async (req, res) => {
 
 router.get('/list', async (req, res) => {
     const output = await getListData(req);
-    res.render('address-book/list', output);
+
+    if (req.session.admin) {
+        res.render('address-book/list', output);
+    } else {
+        res.render('address-book/list-noadmin', output);
+    }
 });
 
 router.get('/add', (req, res) => {

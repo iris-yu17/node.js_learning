@@ -34,6 +34,7 @@ app.use(express.json());
 
 app.use((req, res, next) => {
     res.locals.title = '小新牛排店';
+    res.locals.sess = req.session;
     next();
 })
 
