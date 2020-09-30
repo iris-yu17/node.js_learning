@@ -10,6 +10,7 @@ const db = require('./db_connect2');
 const sessionStore = new MysqlStore({}, db);
 const axios = require('axios');
 
+// test
 // upload位置  (dest stands for destination)
 const upload = multer({ dest: __dirname + '/../tmp_uploads' });
 const app = express();
