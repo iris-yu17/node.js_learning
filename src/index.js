@@ -31,7 +31,7 @@ app.use(session({
 // top-level middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
-
+app.use(require('cors')());
 app.use((req, res, next) => {
     res.locals.title = '小新牛排店';
     res.locals.sess = req.session;
