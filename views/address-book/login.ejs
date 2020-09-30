@@ -1,0 +1,105 @@
+<%- include('../parts/html-head') %>
+<%- include('../parts/navbar') %>
+<style>
+    span.red-stars {
+        color: red;
+    }
+
+    small.error-msg {
+        color: red;
+    }
+</style>
+<div class="container">
+    <div class="row d-flex justify-content-center">
+        <div class="col-lg-6 col-sm-12">
+            <div id="infobar" class="alert alert-success" role="alert" style="display: none">
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">管理者登入</h5>
+                    <form name="form1" onsubmit="checkForm(); return false;" novalidate>
+
+                        <div class="form-group">
+                            <label for="account">account</label>
+                            <input type="account" class="form-control" id="account" name="account">
+                            <small class="form-text error-msg"></small>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">password</label>
+                            <input type="tel" class="form-control" id="password" name="password"
+                                pattern="09\d{2}-?\d{3}-?\d{3}">
+                            <small class="form-text error-msg"></small>
+                        </div>
+
+
+                        <button type="submit" class="btn btn-primary">登入</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('../parts/scripts') %>
+<script>
+    const $account = document.querySelector('#account');
+    const $password = document.querySelector('#password');
+    const r_fields = [$account, $password];
+    const infobar = $('#infobar');
+    const submitBtn = document.querySelector('button[type=submit]');
+
+    function checkForm() {
+        let isPass = true;
+
+        r_fields.forEach(el => {
+            el.style.borderColor = '#CCCCCC';
+            el.nextElementSibling.innerHTML = '';
+        });
+
+        // TODO: 檢查資料格式
+        if ($account.value.length < 2) {
+            isPass = false;
+            $account.style.borderColor = 'red';
+            $account.nextElementSibling.innerHTML = '請填寫正確的帳號';
+        }
+        if ($password.value.length < 2) {
+            isPass = false;
+            $password.style.borderColor = 'red';
+            $password.nextElementSibling.innerHTML = '請填寫密碼';
+        }
+
+        if (isPass) {
+            //const fd = new FormData(document.form1);
+
+            fetch('', {
+                method: 'POST',
+                body: JSON.stringify({
+                    account: $account.value,
+                    password: $password.value,
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(r => r.json())
+                .then(obj => {
+                    console.log(obj);
+                    if (obj.success) {
+                        location.href = '/address-book/list';
+                    } else {
+                        infobar.html(obj.error || '帳號或密碼錯誤');
+                        infobar.removeClass('alert-success').addClass('alert-danger');
+                        submitBtn.style.display = 'block';
+                    }
+                    infobar.slideDown();
+                    setTimeout(() => {
+                        infobar.slideUp();
+                    }, 3000)
+                });
+
+        } else {
+            submitBtn.style.display = 'block';
+        }
+    }
+</script>
+<%- include('../parts/html-foot') %>

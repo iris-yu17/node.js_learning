@@ -185,15 +185,15 @@ app.get('/try-session', (req, res) => {
     req.session.myVar = req.session.myVar || 0;
     req.session.myVar++;
     // send裡面要是字串，用''+把它轉為字串
-    res.send('' + req.session.myVar)
+    // res.send('' + req.session.myVar)
 
     console.log(req.session);
 
     // 看json註解掉上面send
-    // res.json({
-    //     myVar: req.session.myVar,
-    //     session: req.session
-    // });
+    res.json({
+        myVar: req.session.myVar,
+        session: req.session
+    });
 });
 
 app.get('/try-moment', (req, res) => {

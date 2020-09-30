@@ -6,8 +6,31 @@ const upload = require(__dirname + '/../upload-img-module');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-    res.send('address-book');
+    res.redirect('/address-book/list');
 });
+
+router.get('/login', (req, res) => {
+    res.render('address-book/login');
+});
+router.post('/login', async (req, res) => {
+    const output = {
+        body: req.body,
+        success: false,
+    }
+    const sql = "SELECT `sid`, `account`, `nickname` FROM `admins` WHERE account=? AND password=SHA1(?)";
+    const [rs] = await db.query(sql, [req.body.account, req.body.password]);
+    if (rs.length) {
+        req.session.admin = rs[0];
+        output.success = true;
+    }
+    res.json(output);
+})
+router.get('/logout', (req, res) => {
+    delete req.session.admin;
+    res.redirect('/address-book/list');
+})
+
+
 
 async function getListData(req) {
     const output = {
